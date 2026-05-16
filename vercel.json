@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "name": "online-record",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "buildCommand": "next build"
+}
