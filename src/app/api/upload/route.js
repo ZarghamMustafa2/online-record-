@@ -7,10 +7,10 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 export async function POST(request) {
   try {
-    // const session = await getServerSession(authOptions);
-    // if (!session || session.user?.email !== 'zarghammustafa@gmail.com') {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.email !== 'zarghammustafa@gmail.com') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     const formData = await request.formData();
     const file = formData.get('file');
@@ -22,31 +22,20 @@ export async function POST(request) {
 
     const id = uuidv4();
     
-    // Anonymous Permanent Upload via Catbox.moe
-    const catboxData = new FormData();
-    catboxData.append('reqtype', 'fileupload');
-    catboxData.append('fileToUpload', file);
-
-    const catboxRes = await fetch('https://catbox.moe/user/api.php', {
-      method: 'POST',
-      body: catboxData
+    // Vercel Blob Upload (Cloud Storage)
+    const blob = await put(`documents/${id}-${file.name}`, file, {
+      access: 'public',
     });
-
-    if (!catboxRes.ok) {
-      throw new Error('Catbox upload failed');
-    }
-
-    const fileUrl = await catboxRes.text();
 
     const doc = {
       id,
       title,
       originalName: file.name,
-      blobUrl: fileUrl, // Now points to Catbox.moe URL
+      blobUrl: blob.url, // Official Vercel Blob URL
       createdAt: new Date().toISOString()
     };
     
-    // Insert into JsonBlob
+    // Insert into Upstash Redis
     await db.insertDocument(doc);
 
     return NextResponse.json({ success: true, document: doc });

@@ -10,11 +10,11 @@ export default async function DocumentPage({ params }) {
     notFound();
   }
 
-  const isImage = doc.filename.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-  const isPdf = doc.filename.match(/\.pdf$/i);
-
-  // Vercel blob URL
-  const fileUrl = doc.blobUrl || `/uploads/${doc.filename}`;
+  // Pure Cloud URL
+  const fileUrl = doc.blobUrl;
+  const filename = doc.originalName || "Document";
+  const isImage = filename.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+  const isPdf = filename.match(/\.pdf$/i);
 
   return (
     <div className={styles.container}>
